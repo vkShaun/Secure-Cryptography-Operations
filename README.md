@@ -56,19 +56,19 @@ This project was built to **visually demonstrate how real-world security mechani
 > The following screenshots demonstrate each cryptographic operation performed in the application:
 
 ### 1️⃣ User Interface
-![AES Encryption](screenshots/01-ui-overview.png)
+<img src="screenshots/01-ui-overview.png" width="600"/>
 
 ### 2️⃣ AES Encryption
-![AES Decryption](screenshots/02-aes-encryption.png)
+<img src="screenshots/02-aes-encryption.png" width="700"/>
 
 ### 3️⃣ AES Decryption
-![HTTPS Client](screenshots/03-aes-decryption.png)
+<img src="screenshots/03-aes-decryption.png" width="700"/>
 
 ### 4️⃣ HTTPS Secure Transmission
-![HTTPS Server](screenshots/04-https-secure-transmission.png)
+<img src="screenshots/04-https-secure-transmission.png" width="700"/>
 
 ### 5️⃣ RSA Digital Signature Verification
-![RSA Signature](screenshots/05-rsa-signature-verification.png)
+<img src="screenshots/05-rsa-signature-verification.png" width="700"/>
 
 ---
 
