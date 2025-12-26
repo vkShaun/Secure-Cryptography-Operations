@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Cryptography Operations</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.2.1/jsencrypt.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f8fa;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;  
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .content {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .content.active {
+            display: block;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .explanation {
+            background-color: #e7f3fe;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .tls-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .status-circle {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .log-window {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 220px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+        }
+        .https-demo {
+            display: flex;
+            margin-top: 20px;
+        }
+        .https-demo-panel {
+            flex: 1;
+            margin: 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+        }
+        .certificate-info {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border-left: 4px solid #6c757d;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .browser-mockup {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .browser-header {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        .browser-address-bar {
+            flex: 1;
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        .browser-body {
+            padding: 15px;
+            background-color: white;
+        }
+        .browser-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
+        .https-lock {
+            color: #4CAF50;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .implementation-steps {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .implementation-steps ol {
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .implementation-steps li {
+            margin-bottom: 10px;
+        }
+        .user-info {
+            text-align: right;
+            margin-bottom: 20px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Secure Cryptography Operations</h1>
+    
+    <!-- <div class="user-info">Welcome, John</div> -->
+    
+    <div class="tab-container">
+        <div class="tab active" onclick="openTab('data-storage')">Secure Data Storage (AES)</div>
+        <div class="tab" onclick="openTab('data-transmission')">Secure Data Transmission (TLS/HTTPS - Conceptual Demo)</div>
+        <div class="tab" onclick="openTab('digital-signatures')">Digital Signatures (RSA)</div>
+    </div>
+    
+    <!-- AES Data Storage Tab -->
+    <div id="data-storage" class="content active">
+        <div class="explanation">
+            <h3>Secure Data Storage with AES</h3>
+            
+
+            <p>AES (Advanced Encryption Standard) is used to encrypt sensitive data before storing it. This ensures that even if unauthorized access occurs, the data remains unreadable without the correct key.</p>
+        </div>
+        
+        <div class="section">
+            <h3>Encrypt Data</h3>
+            <textarea id="data-to-encrypt" rows="5" placeholder="Enter sensitive data to encrypt..."></textarea>
+            <input type="password" id="encryption-key" placeholder="Enter encryption key (password)">
+            <button onclick="encryptData()">Encrypt</button>
+            <div id="encrypted-result" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Decrypt Data</h3>
+            <textarea id="data-to-decrypt" rows="5" placeholder="Enter encrypted data..."></textarea>
+            <input type="password" id="decryption-key" placeholder="Enter decryption key (same password)">
+            <button onclick="decryptData()">Decrypt</button>
+            <div id="decrypted-result" class="result"></div>
+        </div>
+    </div>
+    
+    <!-- TLS/HTTPS Data Transmission Tab -->
+    <div id="data-transmission" class="content">
+        <div class="explanation">
+            <h3>Secure Data Transmission with TLS/HTTPS</h3>
+            <p><strong>Note:</strong> This section demonstrates the TLS/HTTPShandshake conceptually. Actual TLS encryption occurs at the transport layer and requires a server and trusted certificates.</p>
+            <p>HTTPS uses TLS (Transport Layer Security) to provide encrypted communication between client and server, ensuring data confidentiality and integrity during transmission. The "S" in HTTPS stands for "Secure."</p>
+        </div>
+        
+        <div id="https-status" class="alert">
+            <!-- Will be filled by JavaScript -->
+        </div>
+        
+        <div class="browser-mockup">
+            <div class="browser-header">
+                <div class="browser-address-bar">
+                    <span id="https-indicator"></span>
+                    <span id="url-display">example.com</span>
+                </div>
+            </div>
+            <div class="browser-body">
+                <p>This mockup demonstrates how browsers indicate a secure HTTPS connection.</p>
+                <p>Look for the lock icon and "https://" in the address bar.</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>HTTPS in Action</h3>
+            <div class="https-demo">
+                <div class="https-demo-panel">
+                    <h4>Client (Browser)</h4>
+                    <textarea id="https-request-data" rows="5" placeholder="Enter data to send securely..."></textarea>
+                    <button onclick="sendSecureRequest()">Send Secure Request</button>
+                </div>
+                <div class="https-demo-panel">
+                    <h4>Server Response</h4>
+                    <div id="https-response" class="result">
+                        <p>Server response will appear here...</p>
+                    </div>
+                </div>
+            </div>
+            <div id="https-log" class="log-window"></div>
+        </div>
+        
+        <div class="section">
+            <h3>SSL/TLS Certificate Information</h3>
+            <button onclick="showCertificateInfo()">View Certificate Details</button>
+            <div id="certificate-info" class="certificate-info"></div>
+        </div>
+        
+        <div class="implementation-steps">
+            <h3>How to Implement HTTPS on Your Website</h3>
+            <ol>
+                <li><strong>Obtain an SSL/TLS Certificate:</strong>
+                    <ul>
+                        <li>Purchase from a Certificate Authority (CA) like DigiCert, Comodo, or GeoTrust</li>
+                        <li>Get a free certificate from Let's Encrypt</li>
+                        <li>Generate a self-signed certificate (for development only)</li>
+                    </ul>
+                </li>
+                <li><strong>Install the Certificate on Your Web Server:</strong>
+                    <div class="code-block">
+                        # Example for Apache server<br>
+                        SSLEngine on<br>
+                        SSLCertificateFile /path/to/certificate.crt<br>
+                        SSLCertificateKeyFile /path/to/private.key<br>
+                        SSLCertificateChainFile /path/to/ca_bundle.crt
+                    </div>
+                    <div class="code-block">
+                        # Example for Nginx server<br>
+                        server {<br>
+                        &nbsp;&nbsp;listen 443 ssl;<br>
+                        &nbsp;&nbsp;ssl_certificate /path/to/certificate.crt;<br>
+                        &nbsp;&nbsp;ssl_certificate_key /path/to/private.key;<br>
+                        &nbsp;&nbsp;ssl_trusted_certificate /path/to/ca_bundle.crt;<br>
+                        }
+                    </div>
+                </li>
+                <li><strong>Redirect HTTP to HTTPS:</strong>
+                    <div class="code-block">
+                        # Apache .htaccess example<br>
+                        RewriteEngine On<br>
+                        RewriteCond %{HTTPS} off<br>
+                        RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+                    </div>
+                    <div class="code-block">
+                        # Nginx example<br>
+                        server {<br>
+                        &nbsp;&nbsp;listen 80;<br>
+                        &nbsp;&nbsp;server_name example.com;<br>
+                        &nbsp;&nbsp;return 301 https://$host$request_uri;<br>
+                        }
+                    </div>
+                </li>
+                <li><strong>Set Up Proper Security Headers:</strong>
+                    <div class="code-block">
+                        # Important security headers<br>
+                        Strict-Transport-Security: max-age=31536000; includeSubDomains<br>
+                        Content-Security-Policy: upgrade-insecure-requests<br>
+                        X-Content-Type-Options: nosniff<br>
+                        Referrer-Policy: strict-origin-when-cross-origin
+                    </div>
+                </li>
+                <li><strong>Test Your HTTPS Implementation:</strong>
+                    <ul>
+                        <li>Use SSL Labs Server Test: <a href="#">https://www.ssllabs.com/ssltest/</a></li>
+                        <li>Check for mixed content issues</li>
+                        <li>Ensure all resources load over HTTPS</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+    
+    <!-- RSA Digital Signatures Tab -->
+    <div id="digital-signatures" class="content">
+        <div class="explanation">
+            <h3>Digital Signatures with RSA</h3>
+            <p>RSA digital signatures ensure data authenticity and non-repudiation. The sender signs the data with their private key, and recipients can verify the signature using the sender's public key.</p>
+        </div>
+        
+        <div class="section">
+            <h3>Generate Keys</h3>
+            <button onclick="generateRSAKeys()">Generate New Key Pair</button>
+            <div id="key-result" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Sign Document</h3>
+            <textarea id="document-to-sign" rows="5" placeholder="Enter document content to sign..."></textarea>
+            <button onclick="signDocument()">Sign Document</button>
+            <div id="signature-result" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Verify Signature</h3>
+            <textarea id="document-to-verify" rows="5" placeholder="Enter document content..."></textarea>
+            <textarea id="signature-to-verify" rows="3" placeholder="Enter signature..."></textarea>
+            <button onclick="verifySignature()">Verify Signature</button>
+            <div id="verification-result" class="result"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let privateKey = '';
+        let publicKey = '';
+        
+        // Tab navigation
+        function openTab(tabName) {
+            const tabs = document.getElementsByClassName('tab');
+            const contents = document.getElementsByClassName('content');
+            
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+                contents[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[onclick="openTab('${tabName}')"]`).classList.add('active');
+        }
+        
+        // AES Encryption and Decryption
+
+        // AES encryption using CryptoJS (real client-side encryption).
+        // This is suitable for demonstration; production systems should
+        // use proper key derivation (salt + PBKDF2) and server-side handling.
+
+        function encryptData() {
+            const data = document.getElementById('data-to-encrypt').value;
+            const key = document.getElementById('encryption-key').value;
+            
+            if (!data || !key) {
+                document.getElementById('encrypted-result').innerHTML = 'Please enter both data and encryption key';
+                return;
+            }
+            
+            try {
+                const encrypted = CryptoJS.AES.encrypt(data, key).toString();
+                document.getElementById('encrypted-result').innerHTML = `
+                    <strong>Encrypted Data:</strong><br>
+                    <textarea readonly>${encrypted}</textarea>
+                    <p>This encrypted data can now be safely stored in a database or file system.</p>
+                `;
+            } catch (error) {
+                document.getElementById('encrypted-result').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        function decryptData() {
+            const encryptedData = document.getElementById('data-to-decrypt').value;
+            const key = document.getElementById('decryption-key').value;
+            
+            if (!encryptedData || !key) {
+                document.getElementById('decrypted-result').innerHTML = 'Please enter both encrypted data and decryption key';
+                return;
+            }
+            
+            try {
+                const decrypted = CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
+                if (!decrypted) {
+                    throw new Error('Decryption failed. Check your encrypted data and key.');
+                }
+                document.getElementById('decrypted-result').innerHTML = `
+                    <strong>Decrypted Data:</strong><br>
+                    <textarea readonly>${decrypted}</textarea>
+                `;
+            } catch (error) {
+                document.getElementById('decrypted-result').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        // HTTPS/TLS Implementation
+        // NOTE:
+        // This function simulates the TLS handshake for educational purposes.
+        // Real TLS/HTTPS encryption requires a server, certificates, and
+        // occurs below the application layer (not in JavaScript).
+
+        function sendSecureRequest() {
+            const data = document.getElementById('https-request-data').value;
+            if (!data) {
+                appendToHttpsLog('Error: Please enter data to send');
+                return;
+            }
+            
+            const logElement = document.getElementById('https-log');
+            logElement.innerHTML = '';
+            
+            // Simulate the TLS handshake and HTTPS request
+            appendToHttpsLog('Initiating secure HTTPS connection...');
+            
+            setTimeout(() => {
+                appendToHttpsLog('► Client Hello: Sending supported cipher suites and TLS version');
+            }, 300);
+            
+            setTimeout(() => {
+                appendToHttpsLog('◄ Server Hello: Selected cipher suite TLS_AES_256_GCM_SHA384');
+                appendToHttpsLog('◄ Server sends SSL/TLS certificate');
+            }, 600);
+            
+            setTimeout(() => {
+                appendToHttpsLog('► Client verifies certificate against trusted Certificate Authorities');
+                appendToHttpsLog('► Certificate validated successfully');
+            }, 900);
+            
+            setTimeout(() => {
+                appendToHttpsLog('► Client and server exchange keys for symmetric encryption');
+                appendToHttpsLog('✓ Secure TLS 1.3 connection established');
+            }, 1200);
+            
+            setTimeout(() => {
+                appendToHttpsLog(`► Sending HTTPS POST request with encrypted data`);
+                
+                // Simulate encryption
+                const encryptedPayload = CryptoJS.AES.encrypt(data, 'simulation-key').toString().substring(0, 30) + '...';
+                appendToHttpsLog(`► Encrypted payload: ${encryptedPayload}`);
+            }, 1500);
+            
+            setTimeout(() => {
+                appendToHttpsLog('◄ Server processing request');
+            }, 1800);
+            
+            setTimeout(() => {
+                appendToHttpsLog('◄ Server sending encrypted response');
+                
+                // Display the "server" response
+                document.getElementById('https-response').innerHTML = `
+                    <strong>Secure Response Received:</strong>
+                    <p>Your data "${data}" was securely transmitted over HTTPS and processed by the server.</p>
+                    <p>Status: 200 OK</p>
+                    <p>Response Time: 123ms</p>
+                    <p>Secure Connection: TLS 1.3</p>
+                `;
+            }, 2100);
+            
+            setTimeout(() => {
+                appendToHttpsLog('✓ Complete HTTPS transaction successful');
+            }, 2400);
+        }
+        
+        function appendToHttpsLog(message) {
+            const logElement = document.getElementById('https-log');
+            logElement.innerHTML += `${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function showCertificateInfo() {
+            // Simulate certificate information
+            const certInfo = {
+                subject: "CN=example.com, O=Your Organization, L=Your City, ST=Your State, C=US",
+                issuer: "CN=Let's Encrypt Authority X3, O=Let's Encrypt, C=US",
+                validFrom: "April 9, 2025",
+                validTo: "July 8, 2025",
+                fingerprint: "SHA-256: 3A:40:BF:44:C7:89:B8:9D:EA:D1:FC:A4:B8:5A:15:D9:F8:07:B1:AB:D7:59:4E:19:79:6F:B0:7E:C0:9B:E3:7E",
+                publicKey: "RSA 2048 bit",
+                keyUsage: "Digital Signature, Key Encipherment",
+                extendedKeyUsage: "TLS Web Server Authentication, TLS Web Client Authentication"
+            };
+            
+            document.getElementById('certificate-info').innerHTML = `
+                <h4>SSL/TLS Certificate</h4>
+                <p><strong>Subject:</strong> ${certInfo.subject}</p>
+                <p><strong>Issuer:</strong> ${certInfo.issuer}</p>
+                <p><strong>Valid From:</strong> ${certInfo.validFrom}</p>
+                <p><strong>Valid To:</strong> ${certInfo.validTo}</p>
+                <p><strong>Public Key:</strong> ${certInfo.publicKey}</p>
+                <p><strong>Fingerprint:</strong><br>${certInfo.fingerprint}</p>
+                <p><strong>Key Usage:</strong> ${certInfo.keyUsage}</p>
+                <p><strong>Extended Key Usage:</strong> ${certInfo.extendedKeyUsage}</p>
+            `;
+        }
+        
+        // RSA Digital Signatures - FIXED IMPLEMENTATION
+
+        // RSA key generation and digital signatures using JSEncrypt.
+        // Implemented for educational purposes; key size reduced for
+        // performance in browser-based demo.
+
+        function generateRSAKeys() {
+            try {
+                const keySize = 1024; // Using a smaller key size for demo performance
+                const crypt = new JSEncrypt({default_key_size: keySize});
+                crypt.getKey();
+                
+                privateKey = crypt.getPrivateKey();
+                publicKey = crypt.getPublicKey();
+                
+                document.getElementById('key-result').innerHTML = `
+                    <p><strong>Keys Generated Successfully!</strong></p>
+                    <p>Private Key (keep this secret!):</p>
+                    <textarea readonly rows="5">${privateKey}</textarea>
+                    <p>Public Key (share with others):</p>
+                    <textarea readonly rows="15">${publicKey}</textarea>
+                `;
+                
+                // Also pre-fill verification fields with the new keys for testing
+                document.getElementById('signature-result').innerHTML = '';
+                document.getElementById('verification-result').innerHTML = '';
+            } catch (error) {
+                document.getElementById('key-result').innerHTML = `<p>Error generating keys: ${error.message}</p>`;
+                console.error("Key generation error:", error);
+            }
+        }
+        
+        function signDocument() {
+            const documentText = document.getElementById('document-to-sign').value;
+            
+            if (!documentText) {
+                document.getElementById('signature-result').innerHTML = '<p>Please enter document content to sign</p>';
+                return;
+            }
+            
+            if (!privateKey) {
+                document.getElementById('signature-result').innerHTML = '<p>Please generate keys first</p>';
+                return;
+            }
+            
+            try {
+                const signer = new JSEncrypt();
+                signer.setPrivateKey(privateKey);
+                
+                // Use SHA-256 for hashing
+                const hash = CryptoJS.SHA256(documentText).toString();
+                
+                // Sign the hash
+                const signature = signer.sign(documentText, CryptoJS.SHA256, "sha256");
+                
+                if (!signature) {
+                    throw new Error("Signature generation failed");
+                }
+                
+                // Display the signature result
+                document.getElementById('signature-result').innerHTML = `
+                    <strong>Document Successfully Signed!</strong><br>
+                    <p>Document Hash (SHA-256): ${hash.substring(0, 16)}...</p>
+                    <p>Digital Signature:</p>
+                    <textarea readonly rows="3">${signature}</textarea>
+                    <p>This signature uniquely identifies you as the signer and ensures document integrity.</p>
+                `;
+                
+                // Auto-fill the verification fields for ease of testing
+                document.getElementById('document-to-verify').value = documentText;
+                document.getElementById('signature-to-verify').value = signature;
+            } catch (error) {
+                document.getElementById('signature-result').innerHTML = `<p>Error signing document: ${error.message}</p>`;
+                console.error("Signing error:", error);
+            }
+        }
+        
+        function verifySignature() {
+            const documentText = document.getElementById('document-to-verify').value;
+            const signature = document.getElementById('signature-to-verify').value;
+            
+            if (!documentText || !signature) {
+                document.getElementById('verification-result').innerHTML = '<p>Please enter both document and signature</p>';
+                return;
+            }
+            
+            if (!publicKey) {
+                document.getElementById('verification-result').innerHTML = '<p>Please generate keys first</p>';
+                return;
+            }
+            
+            try {
+                const verifier = new JSEncrypt();
+                verifier.setPublicKey(publicKey);
+                
+                // Verify the signature
+                const isValid = verifier.verify(documentText, signature, CryptoJS.SHA256, "sha256");
+                
+                if (isValid) {
+                    document.getElementById('verification-result').innerHTML = `
+                        <strong style="color: green;">✓ Signature Valid</strong><br>
+                        <p>The document signature is valid. This confirms:</p>
+                        <ul>
+                            <li>The document was signed by the owner of the private key</li>
+                            <li>The document has not been modified since it was signed</li>
+                        </ul>
+                    `;
+                } else {
+                    document.getElementById('verification-result').innerHTML = `
+                        <strong style="color: red;">✗ Signature Invalid</strong><br>
+                        <p>The signature could not be verified. This could mean:</p>
+                        <ul>
+                            <li>The document was modified after signing</li>
+                            <li>The signature was created with a different private key</li>
+                            <li>The signature data is corrupted</li>
+                        </ul>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('verification-result').innerHTML = `<p>Error verifying signature: ${error.message}</p>`;
+                console.error("Verification error:", error);
+            }
+        }
+        
+        // Check if the connection is secure (HTTPS/TLS)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the current page is loaded via HTTPS
+            const isSecureConnection = window.location.protocol === 'https:';
+            const statusElement = document.getElementById('https-status');
+            const httpsIndicator = document.getElementById('https-indicator');
+            const urlDisplay = document.getElementById('url-display');
+            
+            if (isSecureConnection) {
+                // Real HTTPS connection
+                statusElement.className = 'alert alert-success';
+                statusElement.innerHTML = `
+                    <strong>✓ Secure Connection Detected!</strong>
+                    <p>This page is properly secured with HTTPS, providing encrypted data transmission.</p>
+                `;
+                
+                httpsIndicator.innerHTML = '<span class="https-lock">🔒 https://</span>';
+                urlDisplay.textContent = window.location.hostname + window.location.pathname;
+            } else {
+                // Not using HTTPS
+                statusElement.className = 'alert alert-warning';
+                statusElement.innerHTML = `
+                    <strong>⚠ Demonstration Mode</strong>
+                    <p>This page is currently running in demonstration mode without actual HTTPS. In a production environment, you should deploy this website with a proper SSL/TLS certificate.</p>
+                `;
+                
+                httpsIndicator.innerHTML = '<span style="color:#856404;">http://</span>';
+                urlDisplay.textContent = "example.com/secure-demo";
+            }
+            
+            // Add console logging to help debug
+            console.log("DOM fully loaded");
+            console.log("JSEncrypt library loaded:", typeof JSEncrypt !== 'undefined');
+            console.log("CryptoJS library loaded:", typeof CryptoJS !== 'undefined');
+        });
+    </script>
+</body>
+</html>
